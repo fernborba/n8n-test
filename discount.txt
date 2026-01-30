@@ -1,31 +1,55 @@
-
-Table discount {
-  id varchar [primary key]
-  name varchar
-  description varchar
-  num_cycles integer [note: "For subscriptions, how many cycles does the discount apply for, 0 means it will apply to all cycles"]
-  rate_value integer [note: "The percentage of the discount x 1000"]
-  studio_id varchar
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-}
-
-Table promo_code {
-  id varchar [primary key]
-  discount_id varchar
-  studio_id varchar
-  code varchar
-  active boolean
-  usage_limit_per_user integer [note: "Number of times a user can use a promo code, 0 means unlimited uses"]
-  created_at timestamp
-  updated_at timestamp
-  deleted_at timestamp
-}
-
-Table promo_code_usage {
-  promo_code_id varchar
-  invoice_id varchar
-  user_id varchar
-  created_at timestamp
+{
+  "tables": [
+    {
+      "name": "discount",
+      "primary_key": "id",
+      "columns": [
+        { "name": "id", "type": "varchar", "primary_key": true },
+        { "name": "name", "type": "varchar" },
+        { "name": "description", "type": "varchar" },
+        {
+          "name": "num_cycles",
+          "type": "integer",
+          "note": "For subscriptions, how many cycles does the discount apply for. 0 means it will apply to all cycles"
+        },
+        {
+          "name": "rate_value",
+          "type": "integer",
+          "note": "The percentage of the discount multiplied by 1000"
+        },
+        { "name": "studio_id", "type": "varchar" },
+        { "name": "created_at", "type": "timestamp" },
+        { "name": "updated_at", "type": "timestamp" },
+        { "name": "deleted_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "promo_code",
+      "primary_key": "id",
+      "columns": [
+        { "name": "id", "type": "varchar", "primary_key": true },
+        { "name": "discount_id", "type": "varchar" },
+        { "name": "studio_id", "type": "varchar" },
+        { "name": "code", "type": "varchar" },
+        { "name": "active", "type": "boolean" },
+        {
+          "name": "usage_limit_per_user",
+          "type": "integer",
+          "note": "Number of times a user can use a promo code. 0 means unlimited uses"
+        },
+        { "name": "created_at", "type": "timestamp" },
+        { "name": "updated_at", "type": "timestamp" },
+        { "name": "deleted_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "promo_code_usage",
+      "columns": [
+        { "name": "promo_code_id", "type": "varchar" },
+        { "name": "invoice_id", "type": "varchar" },
+        { "name": "user_id", "type": "varchar" },
+        { "name": "created_at", "type": "timestamp" }
+      ]
+    }
+  ]
 }

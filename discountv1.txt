@@ -1,7 +1,7 @@
 {
   "tables": [
     {
-      "name": "discount",
+      "name": "raw_paymentsdb_sales_tax_v3.discounts",
       "primary_key": "id",
       "columns": [
         { "name": "id", "type": "varchar", "primary_key": true },
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "name": "promo_code",
+      "name": "raw_paymentsdb_sales_tax_v3.promo_codes",
       "primary_key": "id",
       "columns": [
         { "name": "id", "type": "varchar", "primary_key": true },
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "name": "promo_code_usage",
+      "name": "raw_paymentsdb_sales_tax_v3.promo_code_usages",
       "columns": [
         { "name": "promo_code_id", "type": "varchar" },
         { "name": "invoice_id", "type": "varchar" },

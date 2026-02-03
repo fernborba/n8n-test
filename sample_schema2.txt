@@ -1,0 +1,174 @@
+// Use DBML to define your database structure
+// Docs: https://www.dbml.org/docs
+
+Table subscription {
+  id integer [primary key]
+  merchant_id integer [note: "The id of the account used for a particular payment method of a branch. See the accounts table in payments db."]
+  customer_id integer [note: "The id of the account used for a particular payment method of a member. See the accounts table in payments db."]
+  current_retries integer [note: ""]
+  paused integer [note: "1 means the subscription is paused"]
+  external_ref varchar [note: "The user id"]
+  start_date timestamp [note: "The start date of the current cycle (TBC)"]
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+  last_executed_at timestamp
+}
+
+Table subscription_cycle {
+  id integer [primary key]
+  subscription_id varchar
+  retry_style subscription_cycle_retry_style [note: "PARALLEL means the sub will continue if there is an unpaid cycle. LOCK-SUB means the sub will not continue to bill if there is an upaid cycle"]
+  status subscription_cycle_status [note: "The payment status of the cycle"]
+  event_id varchar [note: "The id of the ICal event and its also the invoice id"]
+  current_retries integer [note: "The number of times the cycle has been retried"]
+  confirmed integer [note: "Confirmation of if the cycle should be charged"]
+  period_start timestamp
+  period_end timestamp
+  created_at timestamp
+  updated_at timestamp
+  deleted_at timestamp
+}
+
+Enum subscription_cycle_retry_style {
+  "PARALLEL" 
+  "LOCK-SUB"
+}
+
+Enum subscription_cycle_status {
+  "OPEN"
+  "PAID"
+  "PENDING"
+  "FORGIVEN"
+  "PAST-DUE"
+  "UNPAID"
+}
+
+Table log {
+  id integer [primary key]
+  subscription_id integer
+  transaction_id integer [note: "The id of the action request. See the transactions DB actions table."]
+  event_id varchar [note: "The id of the ICal event and its also the invoice id"]
+  transaction_group_id varchar [note: "The id that links multiple transactions for a single attempt"]
+  invoice_id varchar
+  failure_reason varchar 
+  status subscription_log_status
+  action subscription_log_action
+  created_at timestamp
+}
+
+Enum subscription_log_action {
+  "EXECUTE"
+  "UPDATE"
+  "RETRY-AUTO"
+  "CREATE"
+  "RETRY-FORCED"
+  "DELETE"
+  "PAUSE"
+  "FORGIVEN-EVENT"
+  "UPDATE-PAYMENT-METHOD"
+  "UPDATE-ITEM-PRICE"
+}
+
+Enum subscription_log_status {
+  "SUCCESS"
+  "ERROR"
+}
+
+Table invoice {
+  id varchar [primary key]
+  branch_id varchar
+  latest_transaction_group_id varchar [note: "The id that links multiple transactions for a single attempt"]
+  merchant_account_id integer [note: "The id of the account used for a particular payment method of a branch. See the accounts table in payments db."]
+  customer_account_id integer [note: "The id of the account used for a particular payment method of a member. See the accounts table in payments db."]
+  currency varchar
+  amount integer
+  status invoice_status [note: "The payment status of the invoice"]
+  payment_method_type invoice_payment_method_type
+  sold_by varchar [note: "The id of the staff member who processed the sale (dashboard only)"]
+  version integer
+  tax_mode tax_mode
+  latest_transaction_group_status varchar [note: ""]
+  use_fulfilment boolean [note: "If use_fulfilment is true, a message is published to SNS every time the invoice status updates. It is only set to true by invoices created by cart service (since cart service is designed to only allow purchasing of items that are supported by async fulfilment)."]
+  source invoice_source
+  request_uuid varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Enum invoice_status {
+  "PAID"
+  "PAST-DUE"
+  "FORGIVEN"
+  "PENDING"
+  "OPEN"
+}
+
+Enum invoice_payment_method_type {
+  "CARD"
+  "credit_card"
+  "DIRECT_DEBIT"
+  "direct_debit"
+  "complimentary"
+  "COMPLIMENTARY"
+  "FLEXIBLE"
+  "flexible"
+  "CASH"
+  "cash"
+  "BANK_TRANSFER"
+  "bank_transfer"
+  "WALLET"
+  "wallet"
+  "POS_TERMINAL"
+  "pos_terminal"
+  "PAY_LATER"
+  "pay_later"
+}
+
+Enum invoice_source {
+  "SUBSCRIPTION_SERVICE"
+  "DASHBOARD"
+  "MEMBER_APP"
+  "WEBPORTAL"
+  "ADMIN_APP"
+  "LIFT BRANDS" 
+  "BITLANCER PRODUCTION"
+  "SNAP APP"
+  "UN1T"
+}
+
+Table subscription_discount {
+  id integer [primary key]
+  discount_id varchar
+  subscription_id varchar
+  transaction_id varchar
+  cycle_order number
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table subscription_settings {
+  id integer [primary key]
+  subscription_id varchar
+  discounts_pre_applied boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+Ref: subscription.id < subscription_cycle.subscription_id
+Ref: subscription.id < log.subscription_id
+Ref: log.invoice_id - invoice.id
+Ref: invoice.id < invoice_line_item.invoice_id
+Ref: invoice_line_item.id < invoice_applied_taxes.invoice_line_item_id
+Ref: invoice_line_item.id < invoice_applied_discounts.invoice_line_item_id
+Ref: invoice.id < invoice_contact.invoice_id
+Ref: tax.id < invoice_applied_taxes.tax_id
+Ref: tax.id < assigned_tax.tax_id
+Ref: discount.id < promo_code.discount_id
+Ref: discount.id < invoice_applied_discounts.discount_id
+Ref: promo_code.id < promo_code_usage.promo_code_id
+Ref: promo_code_usage.invoice_id - invoice.id
+Ref: subscription_discount.discount_id > discount.id
+Ref: subscription_discount.subscription_id > subscription.id
+Ref: subscription.id - subscription_settings.subscription_id

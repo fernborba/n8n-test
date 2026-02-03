@@ -1,0 +1,55 @@
+{
+  "tables": [
+    {
+      "name": "raw_paymentsdb_sales_tax_v3.discounts",
+      "primary_key": "id",
+      "columns": [
+        { "name": "id", "type": "varchar", "primary_key": true },
+        { "name": "name", "type": "varchar" },
+        { "name": "description", "type": "varchar" },
+        {
+          "name": "num_cycles",
+          "type": "integer",
+          "note": "For subscriptions, how many cycles does the discount apply for. 0 means it will apply to all cycles"
+        },
+        {
+          "name": "rate_value",
+          "type": "integer",
+          "note": "The percentage of the discount multiplied by 1000"
+        },
+        { "name": "studio_id", "type": "varchar" },
+        { "name": "created_at", "type": "timestamp" },
+        { "name": "updated_at", "type": "timestamp" },
+        { "name": "deleted_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "raw_paymentsdb_sales_tax_v3.promo_codes",
+      "primary_key": "id",
+      "columns": [
+        { "name": "id", "type": "varchar", "primary_key": true },
+        { "name": "discount_id", "type": "varchar" },
+        { "name": "studio_id", "type": "varchar" },
+        { "name": "code", "type": "varchar" },
+        { "name": "active", "type": "boolean" },
+        {
+          "name": "usage_limit_per_user",
+          "type": "integer",
+          "note": "Number of times a user can use a promo code. 0 means unlimited uses"
+        },
+        { "name": "created_at", "type": "timestamp" },
+        { "name": "updated_at", "type": "timestamp" },
+        { "name": "deleted_at", "type": "timestamp" }
+      ]
+    },
+    {
+      "name": "raw_paymentsdb_sales_tax_v3.promo_code_usages",
+      "columns": [
+        { "name": "promo_code_id", "type": "varchar" },
+        { "name": "invoice_id", "type": "varchar" },
+        { "name": "user_id", "type": "varchar" },
+        { "name": "created_at", "type": "timestamp" }
+      ]
+    }
+  ]
+}
